@@ -1,0 +1,21 @@
+---
+- name: Validate Network State
+  hosts: "{{ target_hosts | default('all') }}"
+  connection: ansible.netcommon.httpapi
+  gather_facts: false
+
+  vars:
+    anta_runner_testcases:
+      - bgp
+      - interfaces
+      - lldp
+      - routes
+    anta_runner_output_dir: "./anta_results"
+
+  tasks:
+    - name: validate states on EOS devices
+      ansible.builtin.import_role:
+        name: arista.avd.anta_runner
+      vars:
+        anta_runner_testcases: "{{ anta_runner_testcases }}"
+        anta_runner_output_dir: "{{ anta_runner_output_dir }}"

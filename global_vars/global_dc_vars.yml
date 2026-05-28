@@ -1,0 +1,101 @@
+---
+# ============================================================
+# Ansible Connection Settings
+# ============================================================
+ansible_user: "{{ lookup('env', 'ANSIBLE_USER') }}"
+ansible_password: "{{ lookup('env', 'ANSIBLE_PASSWORD') }}"
+ansible_network_os: arista.eos.eos
+ansible_become: true
+ansible_become_method: enable
+ansible_connection: ansible.netcommon.httpapi
+ansible_httpapi_port: 443
+ansible_httpapi_use_ssl: true
+ansible_httpapi_validate_certs: false
+
+# ============================================================
+# CloudVision Settings
+# ============================================================
+cv_token: "{{ lookup('env', 'CV_TOKEN') }}"
+cv_server: cvp
+cv_verify_certs: false
+
+cv_settings:
+  onprem_clusters:
+    - name: atd-cvp
+      servers:
+        - name: 192.168.0.5
+  terminattr:
+    disable_aaa: true
+
+# ============================================================
+# Management Settings — Management1 in VRF MGMT
+# ============================================================
+mgmt_gateway: 192.168.0.1
+mgmt_interface_vrf: mgmt
+mgmt_interface: Management1
+
+# ============================================================
+# NTP Settings
+# ============================================================
+ntp_settings:
+  servers:
+    - name: 192.168.0.1
+      iburst: true
+
+# ============================================================
+# DNS Settings
+# ============================================================
+dns_settings:
+  domain: dns.google
+  servers:
+    - ip_address: 8.8.8.8
+# ============================================================
+# bfd for all Switches
+# ============================================================
+bfd_multihop:
+  interval: 1200
+  min_rx: 1200
+  multiplier: 3
+# ============================================================
+# Fabric Settings
+# ============================================================
+p2p_uplinks_mtu: 1500
+underlay_routing_protocol: ebgp
+overlay_routing_protocol: ebgp
+
+# ============================================================
+# Step 1 - WAN/DCI L3 Edge Links
+# ============================================================
+# Leaf-side DCI links toward the BR-WAN routers.
+# These links provide underlay reachability between the EVPN gateway
+# loopbacks:
+#   s1-leaf2 Loopback0 10.250.1.4 <-> s2-leaf2 Loopback0 10.250.2.4
+#
+# The matching BR-WAN router snippets are generated from:
+#   extra_configs/wan_vars.yml
+# with:
+#   make build-wan
+#
+# Step 2, the EVPN gateway overlay peering, is enabled per site in:
+#   sites/site_1/group_vars/SITE1_FABRIC.yml
+#   sites/site_2/group_vars/SITE2_FABRIC.yml
+l3_edge:
+  p2p_links_ip_pools:
+    - name: DCI_WAN_IP_POOL
+      ipv4_pool: 172.16.255.0/24
+  p2p_links_profiles:
+    - name: DCI_WAN_PROFILE
+      ip_pool: DCI_WAN_IP_POOL
+      include_in_underlay_protocol: true
+      mtu: 1500
+  p2p_links:
+    - id: 1
+      nodes: [ s1-leaf2, BR-WAN1 ]
+      interfaces: [ Ethernet12, Ethernet12 ]
+      as: [ 65101, 65401 ]
+      profile: DCI_WAN_PROFILE
+    - id: 2
+      nodes: [ s2-leaf2, BR-WAN2 ]
+      interfaces: [ Ethernet12, Ethernet12 ]
+      as: [ 65201, 65402 ]
+      profile: DCI_WAN_PROFILE

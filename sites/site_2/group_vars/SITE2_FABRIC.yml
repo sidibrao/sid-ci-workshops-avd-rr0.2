@@ -1,0 +1,140 @@
+---
+fabric_name: SITE2_FABRIC
+
+# Management Settings
+mgmt_interface: Management1
+mgmt_interface_vrf: mgmt
+mgmt_gateway: 192.168.0.1
+
+# Local Users
+# Export LAB_ADMIN_SHA512 and optionally LAB_ADMIN_SSH_KEY before building.
+local_users:
+  - name: "{{ lookup('env', 'LAB_ADMIN_USER') | default('admin', true) }}"
+    privilege: 15
+    role: network-admin
+    sha512_password: "{{ lookup('env', 'LAB_ADMIN_SHA512') }}"
+    ssh_key: "{{ lookup('env', 'LAB_ADMIN_SSH_KEY') | default('', true) }}"
+
+# AAA
+aaa_authorization:
+  exec:
+    default: local
+
+# Spine Switches
+spine:
+  defaults:
+    platform: vEOS
+    mgmt_interface: Management1
+    loopback_ipv4_pool: 10.250.2.0/24
+    bgp_as: 65200
+  nodes:
+    - name: s2-spine1
+      id: 1
+      mgmt_ip: 192.168.0.38/24
+    - name: s2-spine2
+      id: 2
+      mgmt_ip: 192.168.0.39/24
+
+# Leaf Switches
+l3leaf:
+  defaults:
+    platform: vEOS
+    mgmt_interface: Management1
+    spanning_tree_mode: mstp
+    loopback_ipv4_pool: 10.250.2.0/24
+    loopback_ipv4_offset: 2
+    vtep_loopback_ipv4_pool: 10.255.2.0/24
+    uplink_switches: [ s2-spine1, s2-spine2 ]
+    uplink_interfaces: [ Ethernet1, Ethernet2 ]
+    uplink_ipv4_pool: 172.16.2.0/24
+    mlag_interfaces: [ Ethernet7, Ethernet8 ]
+    mlag_peer_ipv4_pool: 10.251.2.0/24
+    mlag_peer_l3_ipv4_pool: 10.252.2.0/24
+    virtual_router_mac_address: 00:1c:73:00:00:99
+  node_groups:
+    - group: S2_RACK1
+      bgp_as: 65201
+      uplink_mtu: 1500
+      spanning_tree_priority: 4096
+      # Step 2 - EVPN Gateway: enable inter-domain EVPN on the rack
+      # containing the DCI leaf. The actual remote gateway peer is only
+      # configured on s2-leaf2 below.
+      evpn_gateway:
+        evpn_l2:
+          enabled: true
+        evpn_l3:
+          enabled: true
+          inter_domain: true
+      mlag_peer_vlan_structured_config:
+        mtu: 1500
+      mlag_peer_l3_vlan_structured_config:
+        mtu: 1500
+      nodes:
+        - name: s2-leaf1
+          id: 1
+          mgmt_ip: 192.168.0.40/24
+          uplink_switch_interfaces: [ Ethernet1, Ethernet1 ]
+        - name: s2-leaf2
+          id: 2
+          mgmt_ip: 192.168.0.41/24
+          uplink_switch_interfaces: [ Ethernet2, Ethernet2 ]
+          # Step 3 - Remote EVPN gateway peer over the WAN/DCI underlay.
+          # Peering source is Loopback0. Remote reachability is provided
+          # by the l3_edge BR-WAN link in global_dc_vars.yml.
+          evpn_gateway:
+            remote_peers:
+              - hostname: s1-leaf2
+                bgp_as: 65101
+                ip_address: 10.250.1.4
+    - group: S2_RACK2
+      bgp_as: 65202
+      uplink_mtu: 1500
+      spanning_tree_priority: 4096
+      mlag_peer_vlan_structured_config:
+        mtu: 1500
+      mlag_peer_l3_vlan_structured_config:
+        mtu: 1500
+      nodes:
+        - name: s2-leaf3
+          id: 3
+          mgmt_ip: 192.168.0.42/24
+          uplink_switch_interfaces: [ Ethernet3, Ethernet3 ]
+        - name: s2-leaf4
+          id: 4
+          mgmt_ip: 192.168.0.43/24
+          uplink_switch_interfaces: [ Ethernet4, Ethernet4 ]
+    - group: S2_BRDR
+      bgp_as: 65203
+      # evpn_gateway:
+      #   evpn_l2:
+      #     enabled: true
+      #   evpn_l3:
+      #     enabled: true
+      #     inter_domain: true
+      nodes:
+        - name: s2-brdr1
+          id: 5
+          mgmt_ip: 192.168.0.200/24
+          uplink_switch_interfaces: [ Ethernet7, Ethernet7 ]
+          # evpn_gateway:
+          #   remote_peers:
+          #     - hostname: s1-brdr1
+          #       bgp_as: 65103
+          #       ip_address: 10.250.1.7
+        - name: s2-brdr2
+          id: 6
+          mgmt_ip: 192.168.0.201/24
+          uplink_switch_interfaces: [ Ethernet8, Ethernet8 ]
+          # evpn_gateway:
+          #   remote_peers:
+          #     - hostname: s1-brdr2
+          #       bgp_as: 65103
+          #       ip_address: 10.250.1.8
+
+# ============================================================
+# BFD for all Switches
+# ============================================================
+bfd_multihop:
+  interval: 1200
+  min_rx: 1200
+  multiplier: 3

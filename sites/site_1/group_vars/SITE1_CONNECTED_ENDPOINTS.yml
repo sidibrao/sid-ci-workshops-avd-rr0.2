@@ -1,0 +1,38 @@
+---
+port_profiles:
+  - profile: PP-VLAN10
+    mode: access
+    vlans: "10"
+    spanning_tree_portfast: edge
+  - profile: PP-VLAN20
+    mode: access
+    vlans: "20"
+    spanning_tree_portfast: edge
+
+servers:
+# --------------------------------------------------------#
+# Site1 RACK1 Endpoints
+# --------------------------------------------------------#
+  - name: s1-host1
+    rack: RACK1
+    adapters:
+      - endpoint_ports: [ eth3, eth4 ]
+        switch_ports: [ Ethernet3, Ethernet3 ]
+        switches: [ s1-leaf1, s1-leaf2 ]
+        profile: PP-VLAN10
+        port_channel:
+          mode: active
+
+# --------------------------------------------------------#
+# Site1 RACK2 Endpoints
+# --------------------------------------------------------#
+
+#   - name: s1-host2
+#     rack: RACK2
+#     adapters:
+#       - endpoint_ports: [ eth1, eth2 ]
+#         switch_ports: [ Ethernet4, Ethernet4 ]
+#         switches: [ s1-leaf3, s1-leaf4 ]
+#         profile: PP-VLAN20
+#         port_channel:
+#           mode: active

@@ -1,0 +1,46 @@
+---
+all:
+  children:
+    LAB:
+      children:
+        SITE1_FABRIC:
+          hosts:
+            s1-spine1:
+              ansible_host: 192.168.0.60
+            s1-spine2:
+              ansible_host: 192.168.0.32
+            s1-leaf1:
+              ansible_host: 192.168.0.33
+            s1-leaf2:
+              ansible_host: 192.168.0.34
+            s1-leaf3:
+              ansible_host: 192.168.0.35
+            s1-leaf4:
+              ansible_host: 192.168.0.36
+        SITE2_FABRIC:
+          hosts:
+            s2-spine1:
+              ansible_host: 192.168.0.38
+            s2-spine2:
+              ansible_host: 192.168.0.39
+            s2-leaf1:
+              ansible_host: 192.168.0.40
+            s2-leaf2:
+              ansible_host: 192.168.0.41
+            s2-leaf3:
+              ansible_host: 192.168.0.42
+            s2-leaf4:
+              ansible_host: 192.168.0.43
+        WAN:
+          vars:
+            ansible_user: "{{ lookup('env', 'ANSIBLE_USER') }}"
+            ansible_password: "{{ lookup('env', 'ANSIBLE_PASSWORD') }}"
+            ansible_network_os: arista.eos.eos
+            ansible_connection: ansible.netcommon.network_cli
+            ansible_become: true
+            ansible_become_method: enable
+          hosts:
+            BR-WAN1:
+              ansible_host: 192.168.0.64
+            BR-WAN2:
+              ansible_host: 192.168.0.65

@@ -1,0 +1,97 @@
+---
+wan_routers:
+  BR-WAN1:
+    hostname: BR-WAN1
+    bgp_as: 65401
+    router_id: 10.10.150.1
+    management_ip: 192.168.0.64/24
+    loopback0: 10.10.150.101/32
+    mlag:
+      enabled: false
+    routed_interfaces:
+      - name: Ethernet11
+        description: CONN_TO_WAN2
+        ip_address: 10.10.150.22/30
+      - name: Ethernet12
+        description: P2P_s1-leaf2_Ethernet12
+        mtu: 1500
+        ip_address: 172.16.255.1/31
+    switched_interfaces:
+      - name: Ethernet7
+        description: Connected_to_dc1-collap-fabric-001-leaf2_VL4012
+        allowed_vlans: "4012"
+      - name: Ethernet8
+        description: Connected_to_dc1-collap-fabric-001-leaf1_VL4011
+        allowed_vlans: "4011"
+      - name: Ethernet9
+        allowed_vlans: "4011"
+      - name: Ethernet10
+        allowed_vlans: "4012"
+    vlans:
+      - id: 4011
+        name: Direct-Peering-V4011
+        svi_ip: 10.249.40.3/29
+      - id: 4012
+        name: Direct-Peering-V4012
+        svi_ip: 10.249.40.11/29
+    bgp_neighbors:
+      - ip: 10.10.150.0
+        remote_as: 65201
+        description: IPv4_eBGP_PEER_TO_DC1_Leaf1
+      - ip: 10.10.150.2
+        remote_as: 65202
+        description: IPv4_eBGP_PEER_TO_DC1_Leaf2
+      - ip: 10.10.150.21
+        remote_as: 65402
+        description: IPv4_eBGP_PEER_TO_WAN2
+      - ip: 172.16.255.0
+        remote_as: 65101
+        description: IPv4_eBGP_PEER_TO_s1-leaf2
+
+  BR-WAN2:
+    hostname: BR-WAN2
+    bgp_as: 65402
+    router_id: 10.10.150.21
+    management_ip: 192.168.0.65/24
+    loopback0: 10.10.150.102/32
+    mlag:
+      enabled: false
+    routed_interfaces:
+      - name: Ethernet7
+        description: CONN_TO_DC2_Leaf2
+        ip_address: 10.10.150.5/31
+      - name: Ethernet11
+        description: CONN_TO_WAN1
+        ip_address: 10.10.150.21/30
+      - name: Ethernet12
+        description: P2P_s2-leaf2_Ethernet12
+        mtu: 1500
+        ip_address: 172.16.255.3/31
+    switched_interfaces:
+      - name: Ethernet2
+        description: Connected_to_dc2-collap-fabric-001-leaf2-VL4012
+        allowed_vlans: "4012"
+      - name: Ethernet3
+        description: connected_To_dc2-collap-fabric-001-leaf1_VL-4011
+        allowed_vlans: "4011"
+      - name: Ethernet9
+        allowed_vlans: "4011"
+      - name: Ethernet10
+        allowed_vlans: "4012"
+    vlans:
+      - id: 4011
+        name: Direct-Peering-V4011
+        svi_ip: 10.249.40.4/29
+      - id: 4012
+        name: Direct-Peering-V4012
+        svi_ip: 10.249.40.12/29
+    bgp_neighbors:
+      - ip: 10.10.150.4
+        remote_as: 65221
+        description: IPv4_eBGP_PEER_TO_DC2_Leaf1
+      - ip: 10.10.150.22
+        remote_as: 65401
+        description: IPv4_iBGP_PEER_TO_WAN2
+      - ip: 172.16.255.2
+        remote_as: 65201
+        description: IPv4_eBGP_PEER_TO_s2-leaf2
