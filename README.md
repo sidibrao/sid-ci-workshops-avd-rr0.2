@@ -4,6 +4,10 @@ This repository contains a working Arista AVD lab for two L3 leaf-spine data cen
 
 The current design has been built, deployed, corrected after reboot testing, and verified live.
 
+## VS Code Work Summary
+
+This repo was finalized from VS Code by updating the AVD YAML source of truth, adding WAN/DCI and EVPN gateway intent, fixing MLAG/BGP reboot behavior, generating BR-WAN configs from Python/YAML, and publishing a sanitized GitHub-ready version.
+
 ## Lab Summary
 
 | Area | Status | Notes |
@@ -17,6 +21,8 @@ The current design has been built, deployed, corrected after reboot testing, and
 | Startup persistence | Working | Corrected configs saved after verification |
 
 ## Topology
+
+![L3LS EVPN Home Lab Topology](images/l3ls-evpn-homelab-topology.png)
 
 ```text
 Site 1 Fabric                         WAN/DCI                         Site 2 Fabric
