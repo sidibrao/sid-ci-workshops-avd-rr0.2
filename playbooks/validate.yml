@@ -1,21 +1,17 @@
 ---
 - name: Validate Network State
   hosts: "{{ target_hosts | default('all') }}"
-  connection: ansible.netcommon.httpapi
+  connection: local
   gather_facts: false
 
   vars:
-    anta_runner_testcases:
-      - bgp
-      - interfaces
-      - lldp
-      - routes
-    anta_runner_output_dir: "./anta_results"
+    # Include VRF-aware BGP checks for the OVERLAY VRF where applicable.
+    avd_catalogs_allow_bgp_vrfs: true
+    # Keep reports concise while still surfacing anything actionable.
+    anta_report_hide_statuses:
+      - success
 
   tasks:
-    - name: validate states on EOS devices
+    - name: Validate EOS operational state with ANTA
       ansible.builtin.import_role:
         name: arista.avd.anta_runner
-      vars:
-        anta_runner_testcases: "{{ anta_runner_testcases }}"
-        anta_runner_output_dir: "{{ anta_runner_output_dir }}"

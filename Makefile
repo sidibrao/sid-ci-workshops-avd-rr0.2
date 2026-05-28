@@ -23,8 +23,12 @@ cvp-site-1: ## Deploy Configs via CloudVision Static Configuration Studio
 	ansible-playbook playbooks/cvp.yml -i sites/site_1/inventory.yml -e "target_hosts=SITE1_FABRIC"
 
 .PHONY: validate-site-1
-validate-site-1: ## Validate network state
+validate-site-1: ## Validate Site 1 network state with ANTA
 	ansible-playbook playbooks/validate.yml -i sites/site_1/inventory.yml -e "target_hosts=SITE1_FABRIC"
+
+.PHONY: anta-dry-run-site-1
+anta-dry-run-site-1: ## Generate Site 1 ANTA catalogs without running tests
+	ansible-playbook playbooks/validate.yml -i sites/site_1/inventory.yml -e "target_hosts=SITE1_FABRIC anta_runner_dry_run=true"
 
 ########################################################
 # Site 2
@@ -47,8 +51,12 @@ cvp-site-2: ## Deploy Configs via CloudVision Static Configuration Studio
 	ansible-playbook playbooks/cvp.yml -i sites/site_2/inventory.yml -e "target_hosts=SITE2_FABRIC"
 
 .PHONY: validate-site-2
-validate-site-2: ## Validate network state
+validate-site-2: ## Validate Site 2 network state with ANTA
 	ansible-playbook playbooks/validate.yml -i sites/site_2/inventory.yml -e "target_hosts=SITE2_FABRIC"
+
+.PHONY: anta-dry-run-site-2
+anta-dry-run-site-2: ## Generate Site 2 ANTA catalogs without running tests
+	ansible-playbook playbooks/validate.yml -i sites/site_2/inventory.yml -e "target_hosts=SITE2_FABRIC anta_runner_dry_run=true"
 
 ########################################################
 # WAN & Hosts - Lab Prep
@@ -68,3 +76,9 @@ preplab: ## Deploy Configs via eAPI
 
 .PHONY: all
 all: build-site-1 build-site-2 deploy-site-1 deploy-site-2
+
+.PHONY: validate-all
+validate-all: validate-site-1 validate-site-2 ## Validate both sites with ANTA
+
+.PHONY: anta-dry-run-all
+anta-dry-run-all: anta-dry-run-site-1 anta-dry-run-site-2 ## Generate ANTA catalogs for both sites without running tests

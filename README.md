@@ -64,8 +64,10 @@ EVPN gateway peer:
 | `sites/site_2/group_vars/SITE2_CONNECTED_ENDPOINTS.yml` | Site 2 host/MLAG endpoint ports |
 | `extra_configs/wan_vars.yml` | Source data for BR-WAN router config generation |
 | `scripts/build_wan.py` | Generates `BR-WAN1.cfg` and `BR-WAN2.cfg` from YAML |
+| `playbooks/validate.yml` | Runs ANTA validation through AVD `anta_runner` |
 | `sites/*/intended/configs/` | AVD-generated EOS configs for review before deploy, regenerated locally |
 | `sites/*/documentation/` | AVD-generated fabric and device documentation, regenerated locally |
+| `sites/*/anta/` | ANTA catalogs and reports, regenerated locally |
 
 ## What Was Fixed
 
@@ -185,6 +187,37 @@ make preplab
 If eAPI has TLS issues against BR-WAN routers, use SSH/network_cli with the same generated configs.
 
 ## Validation Commands
+
+ANTA is integrated through the AVD `arista.avd.anta_runner` role. Build the site first so structured configs exist, then run validation.
+
+Generate ANTA catalogs without touching devices:
+
+```bash
+make anta-dry-run-site-1
+make anta-dry-run-site-2
+```
+
+Run ANTA against each site:
+
+```bash
+make validate-site-1
+make validate-site-2
+```
+
+Run both sites:
+
+```bash
+make validate-all
+```
+
+ANTA outputs are written locally under:
+
+```text
+sites/site_1/anta/reports/
+sites/site_2/anta/reports/
+```
+
+The report folders are ignored in Git because they are generated artifacts and may include local runtime details.
 
 Check MLAG:
 
