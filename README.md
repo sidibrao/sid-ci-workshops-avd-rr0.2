@@ -190,6 +190,12 @@ If eAPI has TLS issues against BR-WAN routers, use SSH/network_cli with the same
 
 ANTA is integrated through the AVD `arista.avd.anta_runner` role. Build the site first so structured configs exist, then run validation.
 
+The committed validation summary is here:
+
+```text
+docs/anta-validation-summary.md
+```
+
 Generate ANTA catalogs without touching devices:
 
 ```bash
